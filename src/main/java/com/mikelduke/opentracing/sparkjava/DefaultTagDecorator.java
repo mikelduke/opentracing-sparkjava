@@ -10,7 +10,7 @@ import io.opentracing.tag.Tags;
 import spark.Request;
 import spark.Response;
 
-public class DefaultTagDecorator implements OpentracingTagDecorator {
+public class DefaultTagDecorator implements OpenTracingTagDecorator {
 
     @Override
     public void before(Request req, Response res, Span span) {

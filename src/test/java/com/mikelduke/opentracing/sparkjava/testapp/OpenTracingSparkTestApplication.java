@@ -1,33 +1,35 @@
-package com.mikelduke.opentracing.sparkjava;
+package com.mikelduke.opentracing.sparkjava.testapp;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.mikelduke.opentracing.sparkjava.OpenTracingSparkFilters;
 
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.util.GlobalTracer;
 import spark.Spark;
 
-public class OpentracingSparkTestApplication {
-    private static final String CLAZZ = OpentracingSparkTestApplication.class.getName();
+public class OpenTracingSparkTestApplication {
+    private static final String CLAZZ = OpenTracingSparkTestApplication.class.getName();
 	private static final Logger LOGGER = Logger.getLogger(CLAZZ);
 
 	private final Tracer tracer;
 
 	public static void main(String[] args) {
-		new OpentracingSparkTestApplication().start();
+		new OpenTracingSparkTestApplication().start();
 	}
 
-	public OpentracingSparkTestApplication() {
+	public OpenTracingSparkTestApplication() {
 		this(GlobalTracer.get());
 	}
 
-	public OpentracingSparkTestApplication(Tracer tracer) {
+	public OpenTracingSparkTestApplication(Tracer tracer) {
 		this.tracer = tracer;
 	}
 
 	public void start() {
-		OpentracingSparkFilters sparkTracingFilters = new OpentracingSparkFilters();
+		OpenTracingSparkFilters sparkTracingFilters = new OpenTracingSparkFilters();
 		Spark.before(sparkTracingFilters.before());
 		Spark.afterAfter(sparkTracingFilters.afterAfter());
         Spark.exception(Exception.class, sparkTracingFilters.exception());
@@ -41,7 +43,7 @@ public class OpentracingSparkTestApplication {
 		});
 
 		Spark.get("/child", (req, res) -> {
-			Span span = req.attribute(OpentracingSparkFilters.SERVER_SPAN);
+			Span span = req.attribute(OpenTracingSparkFilters.SERVER_SPAN);
 			tracer.buildSpan("child").asChildOf(span).withTag("test", "value").start().finish();
 
 			return "done";

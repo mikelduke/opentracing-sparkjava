@@ -16,22 +16,22 @@ import spark.ExceptionHandler;
 import spark.Filter;
 import spark.Request;
 
-public class OpentracingSparkFilters {
+public class OpenTracingSparkFilters {
 
-	public static final String SERVER_SPAN = OpentracingSparkFilters.class.getName() + ".activeSpanContext";
+	public static final String SERVER_SPAN = OpenTracingSparkFilters.class.getName() + ".activeSpanContext";
 
 	private final Tracer tracer;
-	private final List<OpentracingTagDecorator> decorators;
+	private final List<OpenTracingTagDecorator> decorators;
 
-	public OpentracingSparkFilters() {
+	public OpenTracingSparkFilters() {
 		this(GlobalTracer.get());
 	}
 
-	public OpentracingSparkFilters(Tracer tracer) {
+	public OpenTracingSparkFilters(Tracer tracer) {
 		this(tracer, Collections.singletonList(new DefaultTagDecorator()));
 	}
 
-	public OpentracingSparkFilters(Tracer tracer, List<OpentracingTagDecorator> decorators) {
+	public OpenTracingSparkFilters(Tracer tracer, List<OpenTracingTagDecorator> decorators) {
 		this.tracer = tracer;
 		this.decorators = Collections.unmodifiableList(new ArrayList<>(decorators));
 	}
@@ -53,7 +53,7 @@ public class OpentracingSparkFilters {
 					.asChildOf(parentSpan)
 					.start();
 			
-			for(OpentracingTagDecorator decorator : decorators) {
+			for(OpenTracingTagDecorator decorator : decorators) {
 				decorator.before(request, response, span);
 			}
 
@@ -66,7 +66,7 @@ public class OpentracingSparkFilters {
 			Span span = req.attribute(SERVER_SPAN);
 			if (span == null) return;
 
-			for (OpentracingTagDecorator decorator : decorators) {
+			for (OpenTracingTagDecorator decorator : decorators) {
 				decorator.after(req, res, span);
 			}
 
@@ -83,7 +83,7 @@ public class OpentracingSparkFilters {
 			Span span = request.attribute(SERVER_SPAN);
 			if (span == null) return;
 
-			for (OpentracingTagDecorator decorator : decorators) {
+			for (OpenTracingTagDecorator decorator : decorators) {
 				decorator.exception(request, response, span, exception);
 			}
 

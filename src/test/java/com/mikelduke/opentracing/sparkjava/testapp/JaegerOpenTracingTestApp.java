@@ -1,4 +1,4 @@
-package com.mikelduke.opentracing.sparkjava;
+package com.mikelduke.opentracing.sparkjava.testapp;
 
 import io.jaegertracing.Span;
 import io.jaegertracing.Tracer;
@@ -8,7 +8,7 @@ import io.jaegertracing.samplers.ConstSampler;
 import io.jaegertracing.samplers.Sampler;
 import io.opentracing.util.GlobalTracer;
 
-public class JaegerOpentracingTestApp {
+public class JaegerOpenTracingTestApp {
 
 	public static void main(String[] args) {
 
@@ -28,6 +28,6 @@ public class JaegerOpentracingTestApp {
 
         GlobalTracer.register(tracer);
 
-        new OpentracingSparkTestApplication().start();
+        new OpenTracingSparkTestApplication().start();
 	}
 }
