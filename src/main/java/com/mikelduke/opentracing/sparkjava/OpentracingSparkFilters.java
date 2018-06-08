@@ -1,8 +1,9 @@
 package com.mikelduke.opentracing.sparkjava;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.opentracing.Span;
@@ -10,7 +11,6 @@ import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import io.opentracing.propagation.Format;
 import io.opentracing.propagation.TextMapExtractAdapter;
-import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
 import spark.ExceptionHandler;
 import spark.Filter;
@@ -21,13 +21,19 @@ public class OpentracingSparkFilters {
 	public static final String SERVER_SPAN = OpentracingSparkFilters.class.getName() + ".activeSpanContext";
 
 	private final Tracer tracer;
+	private final List<OpentracingTagDecorator> decorators;
 
 	public OpentracingSparkFilters() {
 		this(GlobalTracer.get());
 	}
 
 	public OpentracingSparkFilters(Tracer tracer) {
+		this(tracer, Collections.singletonList(new DefaultTagDecorator()));
+	}
+
+	public OpentracingSparkFilters(Tracer tracer, List<OpentracingTagDecorator> decorators) {
 		this.tracer = tracer;
+		this.decorators = Collections.unmodifiableList(new ArrayList<>(decorators));
 	}
 	
 	public Filter before() {
@@ -45,11 +51,11 @@ public class OpentracingSparkFilters {
 			Span span = tracer
 					.buildSpan(request.requestMethod())
 					.asChildOf(parentSpan)
-					.withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
-					.withTag(Tags.COMPONENT.getKey(), "sparkjava")
-					.withTag(Tags.HTTP_METHOD.getKey(), request.requestMethod())
-					.withTag(Tags.HTTP_URL.getKey(), request.url())
 					.start();
+			
+			for(OpentracingTagDecorator decorator : decorators) {
+				decorator.before(request, response, span);
+			}
 
 			request.attribute(SERVER_SPAN, span);
 		};
@@ -58,9 +64,12 @@ public class OpentracingSparkFilters {
 	public Filter afterAfter() {
 		return (req, res) -> {
 			Span span = req.attribute(SERVER_SPAN);
-			Tags.HTTP_STATUS.set(span, res.status());
-
 			if (span == null) return;
+
+			for (OpentracingTagDecorator decorator : decorators) {
+				decorator.after(req, res, span);
+			}
+
 			span.finish();
 		};
 	}
@@ -71,13 +80,13 @@ public class OpentracingSparkFilters {
 
 	public <T extends Exception> ExceptionHandler<T> exception(ExceptionHandler<T> delegate) {
 		return (exception, request, response) -> {
-			// Handle the exception here
 			Span span = request.attribute(SERVER_SPAN);
 			if (span == null) return;
 
-			Tags.ERROR.set(span, Boolean.TRUE);
-			span.log(logsForException(exception));
-			
+			for (OpentracingTagDecorator decorator : decorators) {
+				decorator.exception(request, response, span, exception);
+			}
+
 			if (delegate != null) {
 				delegate.handle(exception, request, response);
 			}
@@ -86,20 +95,5 @@ public class OpentracingSparkFilters {
 
 	public static SpanContext serverSpanContext(Request request) {
 		return request.attribute(SERVER_SPAN);
-	}
-
-	private Map<String, String> logsForException(Throwable throwable) {
-		Map<String, String> errorLog = new HashMap<>(3);
-		errorLog.put("event", Tags.ERROR.getKey());
-
-		String message = throwable.getCause() != null ? throwable.getCause().getMessage() : throwable.getMessage();
-		if (message != null) {
-			errorLog.put("message", message);
-		}
-		StringWriter sw = new StringWriter();
-		throwable.printStackTrace(new PrintWriter(sw));
-		errorLog.put("stack", sw.toString());
-
-		return errorLog;
 	}
 }
