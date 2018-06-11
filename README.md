@@ -6,6 +6,16 @@ The filters extract tracing headers from incoming requests to create
 [OpenTracing](http://opentracing.io) spans. These spans can be exported to 
 a variety of backends including Jaeger, Hawkular, and others.
 
+## Dependencies
+The Spark dependency is marked as compileOnly and must be supplied
+by the application.
+
+```groovy
+compile group: 'com.sparkjava', name: 'spark-core', version: '2.7.+'
+```
+
+## Usage
+
 To enable tracing you need to add `before`, `exception` and `afterAfter`
 hooks:
 ```java
