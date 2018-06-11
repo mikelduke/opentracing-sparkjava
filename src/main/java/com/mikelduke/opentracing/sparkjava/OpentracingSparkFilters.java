@@ -16,24 +16,40 @@ import spark.ExceptionHandler;
 import spark.Filter;
 import spark.Request;
 
+/**
+ * OpenTracingSparkFilters
+ * 
+ * Contains Spark request filters for before, afterAfter, and exception to 
+ * create OpenTracing Spans for a request.
+ * 
+ */
 public class OpenTracingSparkFilters {
 
-	public static final String SERVER_SPAN = OpenTracingSparkFilters.class.getName() + ".activeSpanContext";
+	public static final String SERVER_SPAN = OpenTracingSparkFilters.class.getName() + ".activeSpan";
 
 	private final Tracer tracer;
 	private final List<OpenTracingTagDecorator> decorators;
 
 	public OpenTracingSparkFilters() {
-		this(GlobalTracer.get());
+		this(null);
 	}
 
 	public OpenTracingSparkFilters(Tracer tracer) {
-		this(tracer, Collections.singletonList(new DefaultTagDecorator()));
+		this(tracer, null);
 	}
 
 	public OpenTracingSparkFilters(Tracer tracer, List<OpenTracingTagDecorator> decorators) {
-		this.tracer = tracer;
-		this.decorators = Collections.unmodifiableList(new ArrayList<>(decorators));
+		if (tracer != null) {
+			this.tracer = tracer;
+		} else {
+			this.tracer = GlobalTracer.get();
+		}
+
+		if (decorators != null && !decorators.isEmpty()) {
+			this.decorators = Collections.unmodifiableList(new ArrayList<>(decorators));
+		} else {
+			this.decorators = Collections.singletonList(new DefaultTagDecorator());
+		}
 	}
 	
 	public Filter before() {
