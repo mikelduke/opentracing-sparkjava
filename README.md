@@ -9,11 +9,23 @@ a variety of backends including Jaeger, Hawkular, and others.
 To enable tracing you need to add `before`, `exception` and `afterAfter`
 hooks:
 ```java
-OpentracingSparkFilters sparkTracingFilters = new OpentracingSparkFilters(tracer);
+OpenTracingSparkFilters sparkTracingFilters = new OpenTracingSparkFilters(tracer);
 Spark.before(sparkTracingFilters.before());
-Spark.exception(sparkTracingFilters.exception());
 Spark.afterAfter(sparkTracingFilters.afterAfter());
+Spark.exception(sparkTracingFilters.exception());
 
 // tracing is added for all routes
 Spark.get("/hello", (req, res) -> "hello world");
+```
+
+To access the current span in a resource retrieve it from the request attributes
+using OpenTracingSparkFilters.SERVER_SPAN:
+```java
+Spark.get("/path", (req, res) -> {
+    Span span = req.attribute(OpenTracingSparkFilters.SERVER_SPAN);
+    tracer.buildSpan("child").asChildOf(span).withTag("test", "value").start().finish();
+
+    //do stuff
+    return "hello world";
+    });
 ```

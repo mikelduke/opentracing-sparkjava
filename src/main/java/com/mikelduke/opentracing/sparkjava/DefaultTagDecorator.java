@@ -10,6 +10,16 @@ import io.opentracing.tag.Tags;
 import spark.Request;
 import spark.Response;
 
+/**
+ * DefaultTagDecorator
+ * 
+ * Called by OpenTracingSparkFilters class to set default tags for 
+ * http request spans. 
+ * 
+ * You can change this functionality by implementing OpenTracingTagDecorator 
+ * interface and setting the decorator list in the OpenTracingSparkFilters
+ * constructor.
+ */
 public class DefaultTagDecorator implements OpenTracingTagDecorator {
 
     @Override
