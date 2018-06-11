@@ -19,7 +19,7 @@ Spark.get("/hello", (req, res) -> "hello world");
 ```
 
 To access the current span in a resource retrieve it from the request attributes
-using OpenTracingSparkFilters.SERVER_SPAN:
+using `OpenTracingSparkFilters.SERVER_SPAN`:
 ```java
 Spark.get("/path", (req, res) -> {
     Span span = req.attribute(OpenTracingSparkFilters.SERVER_SPAN);
@@ -27,5 +27,5 @@ Spark.get("/path", (req, res) -> {
 
     //do stuff
     return "hello world";
-    });
+});
 ```
