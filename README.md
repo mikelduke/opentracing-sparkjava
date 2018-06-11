@@ -1,5 +1,7 @@
+[![OpenTracing Badge](https://img.shields.io/badge/OpenTracing-enabled-blue.svg)](http://opentracing.io)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 # opentracing-sparkjava
-OpenTracing Instrumentation for SparkJava
+[OpenTracing](http://opentracing.io) Instrumentation for [SparkJava](http://sparkjava.com)
 
 This repo contains tracing filters and an exception handler for [SparkJava](http://sparkjava.com/).
 The filters extract tracing headers from incoming requests to create
