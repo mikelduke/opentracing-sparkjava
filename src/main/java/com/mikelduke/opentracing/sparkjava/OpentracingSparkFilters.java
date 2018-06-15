@@ -17,6 +17,7 @@ import spark.Filter;
 import spark.Request;
 
 /**
+ *
  * OpenTracingSparkFilters
  * 
  * Contains Spark request filters for before, afterAfter, and exception to 
@@ -30,14 +31,33 @@ public class OpenTracingSparkFilters {
 	private final Tracer tracer;
 	private final List<OpenTracingTagDecorator> decorators;
 
+	/**
+	 * Creates a new instance with filters using the GlobalTracer
+	 * and default decorator
+	 */
 	public OpenTracingSparkFilters() {
 		this(null);
 	}
 
+	/**
+	 * Create a new instance with filters using the specified Tracer
+	 * and default decorator
+	 * 
+	 * @param tracer the Opentracing Tracer to use in the filters
+	 */
 	public OpenTracingSparkFilters(Tracer tracer) {
 		this(tracer, null);
 	}
 
+	/**
+	 * Create new instance with filters using the specified Tracer and
+	 * specify the List of decorators to use. 
+	 * 
+	 * The default decorator will not be included
+	 *  
+	 * @param tracer the Opentracing Tracer to use in filters
+	 * @param decorators List of decorators to to call when applying Tags
+	 */
 	public OpenTracingSparkFilters(Tracer tracer, List<OpenTracingTagDecorator> decorators) {
 		if (tracer != null) {
 			this.tracer = tracer;
@@ -109,7 +129,13 @@ public class OpenTracingSparkFilters {
 		};
 	}
 
-	public static SpanContext serverSpanContext(Request request) {
+	/**
+	 * Helper method to get the Span from the Request attributes
+	 * 
+	 * @param request Sparkjava request
+	 * @return Span from the request attribute added by the Before filter
+	 */
+	public static Span serverSpanContext(Request request) {
 		return request.attribute(SERVER_SPAN);
 	}
 }
