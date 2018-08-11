@@ -87,7 +87,8 @@ public class OpenTracingSparkFilters {
 			Span span = tracer
 					.buildSpan(request.requestMethod())
 					.asChildOf(parentSpan)
-					.start();
+					.startActive(false)
+					.span();
 			
 			for(OpenTracingTagDecorator decorator : decorators) {
 				decorator.before(request, response, span);
